@@ -2,14 +2,14 @@
 
 # help: [<port>] expose documents in current directoy
 function web-server-here {
-  port=${1:-80}
+  local port=${1:-80}
   sudo ruby -run -ehttpd . -p${port}
 }
 
 #help: take a note, write it to ~/projects/_notes/my-notes.md
 function n {
-  dt=$( date +'%Y-%m-%d %H:%M' )
-  heading=$1
+  local dt=$( date +'%Y-%m-%d %H:%M' )
+  local heading=$1
   echo ${@:1} | awk -v heading="${heading}" -v dt="$dt" '{print "### " dt " - " heading; $1=""; print $0}' >> ~/projects/_notes/my-notes.md
 }
 
