@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# help: [<port>] expose documents in current directoy
+function web-server-here {
+  port=${1:-80}
+  sudo ruby -run -ehttpd . -p${port}
+}
+
+#help: take a note, write it to ~/projects/_notes/my-notes.md
+function n {
+  dt=$( date +'%Y-%m-%d %H:%M' )
+  heading=$1
+  echo ${@:1} | awk -v heading="${heading}" -v dt="$dt" '{print "### " dt " - " heading; $1=""; print $0}' >> ~/projects/_notes/my-notes.md
+}
+
+# help: parse a yaml file to JSON (helpful for jq usage)
+function yaml2json {
+  local file=${1}
+  cat $file | ruby -ryaml -rjson -e 'puts JSON.dump(YAML.load(STDIN.read))'
+}
+
+# help: <directory> <fname-match> <sed-srch-repl>: eg '../adir IMG "s/_hires//g"
+function glob-renamer {
+  local dryRun=false
+
+  if [[ $1 == "-n" ]]; then
+    dryRun=true
+    shift
+  fi
+
+  local theDir=$1
+  local fileMatch=$2
+  local sedSR=$3
+
+  if [[ $dryRun == "true" ]]; then
+    echo find $theDir -name "*${fileMatch}*" 
+    for f in $(find $theDir -name "*${fileMatch}*"); 
+    do 
+      echo "mv $f \$(echo $f | sed \"${sedSR}\" )"
+    done
+  else
+    for f in $(find $theDir -name "*${fileMatch}*"); 
+    do 
+      newName=$(echo $f | sed "${sedSR}")
+      mv $f ${newName}
+    done
+  fi
+
+}

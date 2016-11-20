@@ -1,0 +1,32 @@
+#!/bin/bash
+
+
+#help: <directory-of-certs> - import all certificates in a directory into the "current" JDK
+function jdk-import-certs() {
+
+  local certDir=$1
+  local javaPath=$( python -c "import os,sys; print(os.path.realpath(os.path.expanduser(sys.argv[1])))" `which java` )
+  local osType=$( python -c "import sys; print sys.platform" )
+
+  local javaHome=""
+  if [[ osType == "darwin" ]]; then
+    javaHome=$(/usr/libexec/java_home)
+  elif [[ osType == "linux" ]]; then
+    javaHome=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+  else 
+    echo "not supporting $osType; bailing" 1>&2
+    return 
+  fi
+
+  local cacerts=${javaHome}/jre/lib/security/cacerts
+
+  [ -f ${javaHome}/jre/lib/security/cacerts ] && cacerts=${javaHome}/jre/lib/security/cacerts \
+	  || ( [ -f ${javaHome}/lib/security/cacerts ] && cacerts=${javaHome}/jre/lib/security/cacerts ) \
+	  || echo "can't find the JVM cacerts; bailing" 1>&2 && return
+
+  for i in $(find $certDir -type f -name '*.crt' -or -name '*.pem'); do 
+    echo ":: importing $i"
+    keytool -import -trustcacerts -file $i -keystore ${cacerts} -storepass changeit -noprompt -alias "$i"
+  done
+
+}

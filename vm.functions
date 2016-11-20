@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# help: <machine-name> - Vmware - Collect the Guest IP and put it into our /etc/hosts
+function vwf-collect-ip {
+ local machineName=$1
+ /Applications/VMware\ Fusion.app/Contents/Library/vmrun -gu root runProgramInGuest /opt/vmware-images/${machineName}.vmwarevm/${machineName}.vmx /usr/local/bin/eth-up-down eth0
+ IP=$(/Applications/VMware\ Fusion.app/Contents/Library/vmrun getGuestIPAddress /opt/vmware-images/${machineName}.vmwarevm/${machineName}.vmx) \
+ awk '/${machineName}/ { $0=ENVIRON["IP"] "\t${machineName}" };1 ' /etc/hosts >> /tmp/hosts
+ sudo mv /tmp/hosts /etc/hosts
+ cat /etc/hosts | grep ${machineName}
+}
+
+# help: <machine-name> show the IP of a given VirtualBox machine
+function v-show-ip {
+ local machineName=$1
+ echo ${machineName} $(/Applications/VMware\ Fusion.app/Contents/Library/vmrun getGuestIPAddress /opt/vmware-images/${machineName}.vmwarevm/${machineName}.vmx)
+}
+
+# help: <machine-name> - VirtualBox - reset the network link :-) 
+function v-reset-network {
+  local machineName=$1
+  VBoxManage controlvm ${machineName} setlinkstate1 off
+  VBoxManage controlvm ${machineName} setlinkstate1 on
+}
+

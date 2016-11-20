@@ -1,0 +1,47 @@
+#!/bin/bash
+
+function _locate_functions_dir() {
+  local SOURCE="${BASH_SOURCE[0]}"
+  local DIR="."
+
+  while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  done
+  echo $( cd -P "$( dirname "$SOURCE" )" && pwd )
+}
+
+# help: this "help" output
+function x-help {
+  DOTFILES_DIR=$(_locate_functions_dir)
+  echo "x-help from scripts in ${DOTFILES_DIR}"
+  local optional_command=$1
+  local function_files=`find ${DOTFILES_DIR} -type f -name '*.function*'`
+
+  read -r -d '' helpAwk <<-'EOF'
+  function basename(file) {
+    sub(".*/", "", file)
+    return file
+  }
+
+  BEGIN { help=""; f=""; }
+
+  /^# help/ { help=substr($0,7,80) }
+
+  $0 ~ "^function " cmd && help {
+
+    if(f!=FILENAME) { 
+      f=FILENAME 
+      printf "\n%s\n", basename(FILENAME)
+    } 
+    
+    printf "\t%-30s %s\n",$2,help; 
+    
+    help="";
+
+  }
+	EOF
+
+  awk -v cmd=${optional_command} "$helpAwk" $function_files 
+}

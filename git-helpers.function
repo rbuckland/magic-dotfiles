@@ -1,0 +1,15 @@
+#!/bin/bash
+
+
+# help: show the configured aliases in `~/.git/config
+function g-aliases {
+  awk '/\[alias\]/{f=1;next} /end of aliases/{f=0} f' ~/.gitconfig
+}
+
+# help: git clone to a repo - expects CWD to be <git-server>/
+function p-git-clone {
+  repo=$1
+  user=$( basename ${PWD} )
+  hostname=$( basename $( dirname ${PWD} ) )
+  git clone https://${hostname}/${user}/${repo}
+}
