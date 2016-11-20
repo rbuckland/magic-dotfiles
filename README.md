@@ -38,7 +38,7 @@
 
 ## Writing your own functions
 
-1. Create a `*.function[s]` in your `~/.dotfiles`  directory
+1. Create a `*.function[s]` in your `~/.dotfiles`  directory.
    Group like functions together. This way help is "helpful".
 
 2. Ensure you add a `# help: .. help text` at the top of your function.
