@@ -13,6 +13,7 @@
 4. `x-help` - will present the help of all your custom defined functions
 
   ```
+  mymachine:~$ x-help
   x-help from scripts in /Users/rbuckland/.dotfiles
 
   git-helpers.function
