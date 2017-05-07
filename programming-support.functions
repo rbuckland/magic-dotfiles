@@ -1,0 +1,16 @@
+#!/bin/bash
+
+function wexecute {
+  local watchfile=$1
+  local execute=$2
+
+  echo ":: $watchfile"
+  echo ":: $execute"
+
+   inotifywait -e modify "$watchfile" -m | while read line; do
+       echo "$line"
+       echo "$execute"
+   done
+
+
+}
